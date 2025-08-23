@@ -1,31 +1,38 @@
-import os
-from services.geminiService import ask_gemini
-from services.speechService import speech_to_text, text_to_speech
-from telebot import TeleBot
+import io
+import speech_recognition as sr
+from pydub import AudioSegment
+from services.gemini_service import ask_gemini
 
-def register_voice_handler(bot: TeleBot):
+def register_voice_handler(bot):
     @bot.message_handler(content_types=['voice'])
     def handle_voice(message):
-        file_info = bot.get_file(message.voice.file_id)
-        downloaded_file = bot.download_file(file_info.file_path)
-
-        file_path = "user_voice.ogg"
-        with open(file_path, 'wb') as f:
-            f.write(downloaded_file)
-
         try:
-            #voice to text
-            user_text = speech_to_text(file_path)
-            print(f"[USER VOICE] {user_text}")
+            # Download the voice file from Telegram
+            file_info = bot.get_file(message.voice.file_id)
+            downloaded_file = bot.download_file(file_info.file_path)
 
-            #Asking gemini
-            answer = ask_gemini(user_text)
-            print(f"[GEMINI] {answer}")
+            # Convert OGG to WAV in-memory using pydub
+            audio_ogg = io.BytesIO(downloaded_file)
+            audio = AudioSegment.from_file(audio_ogg, format="ogg")
 
-            # Text to voice
-            response_path = text_to_speech(answer, "bot_response.ogg")
-            with open(response_path, 'rb') as f:
-                bot.send_voice(message.chat.id, f)
+            wav_io = io.BytesIO()
+            audio.export(wav_io, format="wav")
+            wav_io.seek(0)
+
+            # Recognize speech using SpeechRecognition
+            recognizer = sr.Recognizer()
+            with sr.AudioFile(wav_io) as source:
+                audio_data = recognizer.record(source)
+                text = recognizer.recognize_google(audio_data)
+
+            print(f"[VOICE->TEXT] {text}")
+
+            # Ask Gemini for a reply
+            reply = ask_gemini(f"User said: {text}. Reply shortly like a chat buddy.")
+
+            bot.reply_to(message, reply)
 
         except Exception as e:
-            bot.reply_to(message, f"Error: {str(e)}")
+            error_msg = f"Voice processing error: {str(e)}"
+            print(f"[ERROR] {error_msg}")
+            bot.reply_to(message, error_msg)
