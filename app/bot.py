@@ -2,8 +2,8 @@ import telebot
 import os
 from dotenv import load_dotenv
 
-from handlers.textHandler import register_text_handler
-from handlers.voiceHandler import register_voice_handler
+from app.handlers.textHandler import register_text_handler
+from app.handlers.voiceHandler import register_voice_handler
 
 load_dotenv()
 

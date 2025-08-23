@@ -1,4 +1,4 @@
-from services.geminiService import ask_gemini
+from app.services.geminiService import ask_gemini
 from telebot import TeleBot
 
 def register_text_handler(bot: TeleBot):

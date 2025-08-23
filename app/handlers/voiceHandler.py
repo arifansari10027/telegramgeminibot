@@ -1,7 +1,8 @@
 import io
 import speech_recognition as sr
 from pydub import AudioSegment
-from services.gemini_service import ask_gemini
+from gtts import gTTS
+from app.services.geminiService import ask_gemini
 
 def register_voice_handler(bot):
     @bot.message_handler(content_types=['voice'])
@@ -30,6 +31,16 @@ def register_voice_handler(bot):
             # Ask Gemini for a reply
             reply = ask_gemini(f"User said: {text}. Reply shortly like a chat buddy.")
 
+            # Convert Gemini reply to speech (TTS)
+            tts = gTTS(reply, lang="en")
+            voice_io = io.BytesIO()
+            tts.write_to_fp(voice_io)
+            voice_io.seek(0)
+
+            # Send voice reply back
+            bot.send_voice(message.chat.id, voice_io)
+
+            # Also send text reply for clarity
             bot.reply_to(message, reply)
 
         except Exception as e:
