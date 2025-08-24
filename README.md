@@ -61,33 +61,33 @@ Build and run the container
 
 <h2>🚀 Deployment (Railway)</h2>
 
-Push code to GitHub.
+1. Push code to GitHub.
 
-Create a new Railway project → Deploy from GitHub repo.
+2. Create a new Railway project → Deploy from GitHub repo.
 
-Add environment variables in Railway dashboard:
+3. Add environment variables in Railway dashboard:
 
-TELEGRAM_BOT_TOKEN
-
-GEMINI_API_KEY
-
-DATABASE_URL (Railway provides Postgres, copy the connection URL).
+    ```bash
+    TELEGRAM_BOT_TOKEN
+    GEMINI_API_KEY
+    DATABASE_URL (Railway provides Postgres, copy the connection URL).
+    ```
 
 <h2>🛠️ Tech Stack</h2>
 
-Python 3.12
+- Python 3.12
 
-TeleBot (pyTelegramBotAPI)
+- TeleBot (pyTelegramBotAPI)
 
-Google Generative AI (Gemini)
+- Google Generative AI (Gemini)
 
-SpeechRecognition + gTTS + pydub (for voice handling)
+- SpeechRecognition + gTTS + pydub (for voice handling)
 
-PostgreSQL + SQLAlchemy ORM (for persistence)
+- PostgreSQL + SQLAlchemy ORM (for persistence)
 
-Docker (for containerized deployment)
+- Docker (for containerized deployment)
 
-Railway (for hosting)
+- Railway (for hosting)
 
 <h2>📖 Usage</h2>
 
