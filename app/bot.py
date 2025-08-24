@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from app.handlers.textHandler import register_text_handler
 from app.handlers.voiceHandler import register_voice_handler
 from app.handlers.imageHandler import register_image_handler
+from app.services.database import init_db
 
 load_dotenv()
 
@@ -16,6 +17,11 @@ bot = telebot.TeleBot(TELEGRAM_TOKEN)
 register_text_handler(bot)
 register_voice_handler(bot)
 register_image_handler(bot)
+
+if __name__ == "__main__":
+    init_db()
+    print("Database initialized.")
+    bot.infinity_polling()
 
 @bot.message_handler(commands=['start'])
 def start(message):
