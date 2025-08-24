@@ -23,4 +23,6 @@ def save_message(user_id, input_type, content, reply):
 
     reply = ask_gemini(text)
     save_message(message.from_user.id, "text", text, reply)
+    save_message(str(message.from_user.id), "voice", text)
+    save_message(str(message.from_user.id), "image", f"{prompt} | image sent")
     bot.reply_to(message, reply)
