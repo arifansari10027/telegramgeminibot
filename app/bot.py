@@ -48,7 +48,7 @@ def history_cmd(message):
 
         history_text = "🕘 Your last 5 chats:\n\n"
         for log in reversed(logs):
-            history_text += f"👉 {log.input_type.upper()}: {log.content}\n🤖 {log.reply}\n\n"
+            history_text += f"👉 {log.message_type.upper()}: {log.content}\n🤖 {log.reply}\n\n"
 
         bot.reply_to(message, history_text.strip())
 
