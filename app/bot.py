@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from app.handlers.textHandler import register_text_handler
 from app.handlers.voiceHandler import register_voice_handler
 from app.handlers.imageHandler import register_image_handler
-from app.services.database import init_db
+from app.services.database import save_message
 
 load_dotenv()
 
