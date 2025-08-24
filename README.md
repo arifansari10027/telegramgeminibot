@@ -25,35 +25,39 @@ You can try this bot on telegram - [Try Bot](https://t.me/nalyakbot)
 <h2>⚙️ Setup Instructions</h2>
 1️. Clone this repository
 
-``git clone https://github.com/yourusername/gemini-telegram-bot.git``
-
-``cd gemini-telegram-bot``
+```bash
+git clone https://github.com/yourusername/gemini-telegram-bot.git
+cd gemini-telegram-bot
+```
 
 2️. Install dependencies
 
-``pip install -r requirements.txt``
+```bash
+pip install -r requirements.txt
+```
 
 3️. Configure Environment Variables
 
 Create a .env file in the root folder:
 
-``TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
+```bash
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
 GEMINI_API_KEY=your_google_gemini_api_key_here
-DATABASE_URL=postgresql+psycopg2://username:password@host:port/dbname``
+DATABASE_URL=postgresql+psycopg2://username:password@host:port/dbname
+```
 
 
 👉 On Railway, you can add these as project variables.
 
 4️. Run locally
 
-``python -m app.bot``
+```bash 
+python -m app.bot
+```
 
 5️. Run with Docker
 
-Build and run the container:
-
-``docker build -t gemini-bot .
-docker run -d --name gemini-bot -e TELEGRAM_BOT_TOKEN=xxx -e GEMINI_API_KEY=xxx -e DATABASE_URL=xxx gemini-bot``
+Build and run the container
 
 <h2>🚀 Deployment (Railway)</h2>
 
@@ -68,8 +72,6 @@ TELEGRAM_BOT_TOKEN
 GEMINI_API_KEY
 
 DATABASE_URL (Railway provides Postgres, copy the connection URL).
-
-<h2>Deploy</h2>
 
 <h2>🛠️ Tech Stack</h2>
 
