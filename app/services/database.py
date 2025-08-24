@@ -3,6 +3,7 @@ from datetime import datetime
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from . import Base
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
@@ -20,6 +21,7 @@ class MessageLog(Base):
     message_type = Column(String, nullable=False)   # text / voice / image
     content = Column(Text, nullable=False)          # actual text, transcript, or description
     created_at = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime, default=datetime.utcnow)
 
 Base.metadata.create_all(bind=engine)
 
