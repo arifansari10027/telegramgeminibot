@@ -3,10 +3,13 @@ import speech_recognition as sr
 from pydub import AudioSegment
 from gtts import gTTS
 from app.services.geminiService import ask_gemini
+from app.services.database import SessionLocal, MessageLog  # ✅ import DB session + model
+
 
 def register_voice_handler(bot):
     @bot.message_handler(content_types=['voice'])
     def handle_voice(message):
+        db = SessionLocal()
         try:
             # Download the voice file from Telegram
             file_info = bot.get_file(message.voice.file_id)
@@ -31,6 +34,15 @@ def register_voice_handler(bot):
             # Ask Gemini for a reply
             reply = ask_gemini(f"User said: {text}. Reply shortly like a chat buddy.")
 
+            # Save to DB (user input + bot reply)
+            log = MessageLog(
+                user_id=str(message.from_user.id),
+                message_type="voice",
+                content=f"User: {text}\nBot: {reply}"
+            )
+            db.add(log)
+            db.commit()
+
             # Convert Gemini reply to speech (TTS)
             tts = gTTS(reply, lang="en")
             voice_io = io.BytesIO()
@@ -47,3 +59,6 @@ def register_voice_handler(bot):
             error_msg = f"Voice processing error: {str(e)}"
             print(f"[ERROR] {error_msg}")
             bot.reply_to(message, error_msg)
+
+        finally:
+            db.close()
