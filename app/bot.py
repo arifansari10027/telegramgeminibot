@@ -26,6 +26,31 @@ def start(message):
 def image(message):
     bot.reply_to(message, "Please send me an image.")
 
+@bot.message_handler(commands=['help'])
+def help_cmd(message):
+        bot.reply_to(message,
+            "📌 Available Commands:\n"
+            "/start - Welcome message\n"
+            "/help - Show this help menu\n"
+            "/history - Show your last 5 chats"
+        )
+
+@bot.message_handler(commands=['history'])
+def history_cmd(message):
+        db = SessionLocal()
+        logs = db.query(MessageLog).filter_by(user_id=str(message.from_user.id)).order_by(MessageLog.timestamp.desc()).limit(5).all()
+        db.close()
+
+        if not logs:
+            bot.reply_to(message, "⚠️ No history found.")
+            return
+
+        history_text = "🕘 Your last 5 chats:\n\n"
+        for log in reversed(logs):
+            history_text += f"👉 {log.input_type.upper()}: {log.content}\n🤖 {log.reply}\n\n"
+
+        bot.reply_to(message, history_text.strip())
+
 def save_message(user_id: int, message_type: str, content: str):
     try:
         db = SessionLocal()

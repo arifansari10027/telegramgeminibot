@@ -1,0 +1,3 @@
+from app.handlers.commandHandler import register_command_handlers
+...
+register_command_handlers(bot)
