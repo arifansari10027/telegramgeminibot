@@ -6,6 +6,7 @@ from app.handlers.textHandler import register_text_handler
 from app.handlers.voiceHandler import register_voice_handler
 from app.handlers.imageHandler import register_image_handler
 from app.services.database import MessageLog, save_message
+from app.services.database import SessionLocal, MessageLog
 
 load_dotenv()
 
