@@ -39,7 +39,7 @@ def help_cmd(message):
 @bot.message_handler(commands=['history'])
 def history_cmd(message):
         db = SessionLocal()
-        logs = db.query(MessageLog).filter_by(user_id=str(message.from_user.id)).order_by(MessageLog.timestamp.desc()).limit(5).all()
+        logs = db.query(MessageLog).filter_by(user_id=str(message.from_user.id)).order_by(MessageLog.created_at.desc()).limit(5).all()
         db.close()
 
         if not logs:
