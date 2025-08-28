@@ -7,6 +7,7 @@ from app.handlers.voiceHandler import register_voice_handler
 from app.handlers.imageHandler import register_image_handler
 from app.services.database import MessageLog, save_message
 from app.services.database import SessionLocal, MessageLog
+from app.handlers.urlHandler import register_url_handler 
 
 load_dotenv()
 
@@ -18,6 +19,7 @@ bot = telebot.TeleBot(TELEGRAM_TOKEN)
 register_text_handler(bot)
 register_voice_handler(bot)
 register_image_handler(bot)
+register_url_handler(bot)
 
 @bot.message_handler(commands=['start'])
 def start(message):
