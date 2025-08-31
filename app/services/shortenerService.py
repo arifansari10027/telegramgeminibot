@@ -5,7 +5,7 @@ from typing import Optional
 from app.models.links import Link
 from app.services.database import SessionLocal
 
-DOMAIN = os.getenv("DOMAIN", "http://localhost:8000")
+DOMAIN = os.getenv("SHORT_DOMAIN", "http://localhost:8000")
 
 def _generate_unique_code(db, length: int = 6) -> str:
     alphabet = string.ascii_letters + string.digits

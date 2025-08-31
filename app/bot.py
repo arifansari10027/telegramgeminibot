@@ -8,6 +8,7 @@ from app.handlers.imageHandler import register_image_handler
 from app.services.database import MessageLog, save_message
 from app.services.database import SessionLocal, MessageLog
 from app.handlers.urlHandler import register_url_handler 
+from app.services.shortenerService import shorten_url
 
 load_dotenv()
 
@@ -37,6 +38,24 @@ def help_cmd(message):
             "/help - Show this help menu\n"
             "/history - Show your last 5 chats"
         )
+
+@bot.message_handler(commands=["shorten"])
+def handle_shorten(message):
+    try:
+        parts = message.text.split(maxsplit=1)
+        if len(parts) < 2:
+            bot.reply_to(message, "⚠️ Usage: /shorten <URL>")
+            return
+
+        original_url = parts[1]
+        short_url = shorten_url(user_id=str(message.from_user.id), original_url=original_url)
+        if short_url:
+            bot.reply_to(message, f"✅ Your short link: {short_url}")
+        else:
+            bot.reply_to(message, "❌ Failed to create short URL. Try again.")
+    except Exception as e:
+        print(f"[BOT ERROR] {e}")
+        bot.reply_to(message, "❌ Error occurred while shortening.")
 
 @bot.message_handler(commands=['history'])
 def history_cmd(message):
