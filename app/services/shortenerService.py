@@ -1,76 +1,61 @@
+# app/services/shortenerService.py
 import os
 import random
 import string
-from typing import Optional
 from app.models.links import Link
 from app.services.database import SessionLocal
 
-DOMAIN = os.getenv("SHORT_DOMAIN", "http://localhost:8000")
+# Your short domain for public links
+SHORT_DOMAIN = os.getenv("SHORT_DOMAIN", os.getenv("DOMAIN", "http://localhost:8000")).rstrip("/")
 
-def _generate_unique_code(db, length: int = 6) -> str:
-    alphabet = string.ascii_letters + string.digits
+def _generate_unique_code(db, length=6):
     while True:
-        code = "".join(random.choices(alphabet, k=length))
-        exists = db.query(Link).filter_by(short_code=code).first()
-        if not exists:
+        code = ''.join(random.choices(string.ascii_letters + string.digits, k=length))
+        if not db.query(Link).filter_by(short_code=code).first():
             return code
 
-def shorten_url(user_id: int, original_url: str) -> Optional[str]:
+def shorten_url(user_id, original_url):
     db = SessionLocal()
     try:
         code = _generate_unique_code(db)
-        link = Link(
-            user_id=str(user_id),
-            original_url=original_url.strip(),
-            short_code=code,
-        )
+        link = Link(user_id=user_id, original_url=original_url, short_code=code)
         db.add(link)
         db.commit()
-        return f"{DOMAIN}/{code}"
+        db.refresh(link)
+        return f"{SHORT_DOMAIN}/{code}"
     except Exception as e:
-        db.rollback()
         print(f"[ERROR] shorten_url -> {e}")
+        db.rollback()
         return None
     finally:
         db.close()
 
-def get_original_url(short_code: str) -> Optional[Link]:
+def get_original_url(short_code):
     db = SessionLocal()
     try:
         return db.query(Link).filter_by(short_code=short_code, deleted=False).first()
     finally:
         db.close()
 
-def increment_click(short_code: str) -> None:
+def get_user_links(user_id):
     db = SessionLocal()
     try:
-        link = db.query(Link).filter_by(short_code=short_code, deleted=False).first()
+        return db.query(Link).filter_by(user_id=user_id, deleted=False).all()
+    finally:
+        db.close()
+
+def delete_link(user_id, link_id):
+    db = SessionLocal()
+    try:
+        link = db.query(Link).filter_by(id=link_id, user_id=user_id).first()
         if link:
-            link.clicks = (link.clicks or 0) + 1
+            link.deleted = True
             db.commit()
-    except Exception:
+            return True
+        return False
+    except Exception as e:
         db.rollback()
-    finally:
-        db.close()
-
-def get_user_links(user_id: int):
-    db = SessionLocal()
-    try:
-        return db.query(Link).filter_by(user_id=str(user_id), deleted=False).order_by(Link.id.desc()).all()
-    finally:
-        db.close()
-
-def delete_link(user_id: int, link_id: int) -> bool:
-    db = SessionLocal()
-    try:
-        link = db.query(Link).filter_by(id=link_id, user_id=str(user_id)).first()
-        if not link:
-            return False
-        link.deleted = True
-        db.commit()
-        return True
-    except Exception:
-        db.rollback()
+        print(f"[DB ERROR] {e}")
         return False
     finally:
         db.close()
