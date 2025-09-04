@@ -5,7 +5,6 @@ import string
 from app.models.links import Link
 from app.services.database import SessionLocal
 
-# Your short domain for public links
 SHORT_DOMAIN = os.getenv("SHORT_DOMAIN", os.getenv("DOMAIN", "http://localhost:8000")).rstrip("/")
 
 def _generate_unique_code(db, length=6):

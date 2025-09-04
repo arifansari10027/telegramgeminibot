@@ -15,40 +15,33 @@ from app.handlers.voiceHandler import register_voice_handler
 from app.handlers.imageHandler import register_image_handler
 from app.handlers.urlHandler import register_url_handler
 
-# DB bits (ensure tables exist at startup)
 from app.services.database import Base, engine
-from app.models.links import Link  # makes sure Link model is imported
+from app.models.links import Link 
 
-# Shortener service
 from app.services.shortenerService import shorten_url, get_original_url
 
 log = logging.getLogger("uvicorn")
 app = FastAPI(title="Telegram Bot + URL Shortener")
 
-# ── Env ───────────────────────────────────────────────────────────────────────
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "")
-BASE_URL = os.getenv("BASE_URL")  # public base (e.g., https://<app>.azurewebsites.net)
-WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "")  # optional secret path piece
+BASE_URL = os.getenv("BASE_URL")  # for webhook
+SHORT_DOMAIN = os.getenv("SHORT_DOMAIN")  # for short links
+WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "")  
 
 if not TELEGRAM_TOKEN:
     log.warning("TELEGRAM_TOKEN is not set. Webhook will not be configured.")
 
-# ── Telegram bot (webhook mode) ───────────────────────────────────────────────
 bot = telebot.TeleBot(TELEGRAM_TOKEN, parse_mode="HTML")
 
-# Register your existing handlers on this bot
 register_text_handler(bot)
 register_voice_handler(bot)
 register_image_handler(bot)
 register_url_handler(bot)
 
-# ── Models / tables ensure ───────────────────────────────────────────────────
 @app.on_event("startup")
 def _startup():
-    # Ensure tables are created (safe to call repeatedly)
     Base.metadata.create_all(bind=engine)
 
-    # Configure webhook only if we have a public base URL & token
     if TELEGRAM_TOKEN and BASE_URL:
         if WEBHOOK_SECRET:
             path = f"/webhook/{WEBHOOK_SECRET}"
@@ -68,13 +61,10 @@ def _startup():
     else:
         log.warning("BASE_URL or TELEGRAM_TOKEN missing — not setting webhook.")
 
-# ── Health check ─────────────────────────────────────────────────────────────
 @app.get("/healthz")
 def healthz():
     return {"ok": True}
 
-# ── Webhook endpoint ─────────────────────────────────────────────────────────
-# Use secret path if provided
 _webhook_path = f"/webhook/{WEBHOOK_SECRET}" if WEBHOOK_SECRET else "/webhook"
 
 @app.post(_webhook_path)
@@ -88,7 +78,6 @@ async def telegram_webhook(request: Request):
         log.exception("Webhook error")
         return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
 
-# ── Shortener API ────────────────────────────────────────────────────────────
 class ShortenRequest(BaseModel):
     user_id: int
     original_url: str
@@ -98,7 +87,8 @@ def api_shorten(req: ShortenRequest):
     short_url = shorten_url(user_id=req.user_id, original_url=req.original_url)
     if not short_url:
         raise HTTPException(status_code=500, detail="Failed to shorten URL")
-    return {"short_url": short_url}
+    # Always return SHORT_DOMAIN + code
+    return {"short_url": f"{SHORT_DOMAIN.rstrip('/')}/{short_url}"}
 
 @app.get("/{short_code}")
 def redirect_to_original(short_code: str):
